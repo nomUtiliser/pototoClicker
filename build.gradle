@@ -1,0 +1,130 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'application'
+}
+
+group = 'your.packagename'
+version = '1.0'
+
+def javafxversion = "17.0.10"
+def ptfVersion = "7.0"
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = "template"
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri ("https://maven.pkg.github.com/TechnoMastery/PotoFlux-mod-template")
+            credentials {
+                username = project.findProperty("grp.user")
+                password = project.findProperty("grp.key")
+            }
+        }
+    }
+}
+
+repositories {
+    def githubMaven = { String repo ->
+        maven {
+            url = uri("https://maven.pkg.github.com/$repo")
+            credentials {
+                username = project.findProperty("gpr.user")
+                password = project.findProperty("gpr.key")
+            }
+        }
+    }
+
+    mavenCentral()
+    githubMaven("TechnoMastery/PotoFlux")
+}
+
+javadoc {
+    options.links(
+            "https://technomastery.github.io/PotoFluxAppData/javadoc/$ptfVersion",
+            "https://openjfx.io/javadoc/17/",
+            "https://javadoc.io/doc/org.reflections/reflections/0.10.2/",
+            "https://javadoc.io/doc/com.google.code.gson/gson/2.11.0/",
+            "https://javadoc.io/doc/org.jetbrains/annotations/24.1.0/"
+    )
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+javafx {
+    version '17'
+    modules = [ 'javafx.controls', 'javafx.graphics' ]
+}
+
+dependencies {
+    implementation "org.openjfx:javafx-controls:$javafxversion"
+    implementation "org.openjfx:javafx-graphics:$javafxversion"
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // PotoFlux
+    implementation "net.minheur:potoflux:$ptfVersion"
+
+}
+
+processResources {
+    filesMatching("modVersion.properties") {
+        expand "version": version
+    }
+}
+
+build.dependsOn jar
+
+tasks.named("sourcesJar") {
+    dependsOn(generateModVersionProperties)
+
+    exclude("**/*.json", "**/*.toml", "**/*.lang")
+}
+
+tasks.register("generateModVersionProperties") {
+    def outputDir = file("$buildDir/generated/resources")
+    outputs.dir outputDir
+
+    doLast {
+        outputDir.mkdirs()
+        def file = new File(outputDir, "modVersion.properties")
+        file.text = "version=${project.version}"
+    }
+}
+
+sourceSets.main.resources.srcDir("$buildDir/generated/resources")
+
+tasks.processResources.dependsOn(generateModVersionProperties)
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.named("sourcesJar") {
+    dependsOn(generateModVersionProperties)
+
+    exclude("**/*.json", "**/*.toml", "**/*.lang")
+}
+
+tasks.named("run", JavaExec) {
+    group = "potoflux"
+    description = "Run PotoFlux"
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass.set("net.minheur.potoflux.PotoFlux")
+
+    args("devEnv")
+}
