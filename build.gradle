@@ -5,7 +5,7 @@ plugins {
     id 'application'
 }
 
-group = 'your.packagename'
+group = 'net.pototoClicker'
 version = '1.0'
 
 def javafxversion = "17.0.10"
@@ -15,16 +15,16 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifactId = "template"
+            artifactId = "pototoclicker"
         }
     }
 
     repositories {
         maven {
-            url = uri ("https://maven.pkg.github.com/TechnoMastery/PotoFlux-mod-template")
+            url = uri ("https://maven.pkg.github.com/nomUtiliser/pototoClicker")
             credentials {
-                username = project.findProperty("grp.user")
-                password = project.findProperty("grp.key")
+                username = project.findProperty("gpr.user")
+                password = project.findProperty("gpr.key")
             }
         }
     }
