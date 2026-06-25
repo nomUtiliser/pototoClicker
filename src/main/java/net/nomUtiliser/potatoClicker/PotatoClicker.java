@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-@Mod(modId = PotatoClicker.MOD_ID, version = "1.0", compatibleVersions = {"7.0"}, compatibleVersionUrl = "https://technomastery.github.io/PotoFluxAppData/modVersions/template.json") // WARNING: use only one of the two compatible version system. When both are present, the local one is always used. the online one is for you to follow the link and get an example.
+@Mod(modId = PotatoClicker.MOD_ID, version = "1.0", compatibleVersionUrl = "https://nomutiliser.github.io/nomutiliser/pototoClicker/version.json")
 public class PotatoClicker {
     public static final String MOD_ID = "potatoClicker";
 
