@@ -13,17 +13,21 @@ public class ClickerTab extends BaseVTab<VBox> {
     protected void instantiate() {
         PANEL = new VBox();
     }
-
+    protected int money;
     @Override
     protected void setPanel() {
         potato= new Button();
         potato.setMaxSize(250, 60);
         potato.setPrefSize(250, 30);
-        potato.setText("🥔");
+        potato.setText("patate");
         vContent.getChildren().add(potato);
+        potato.setOnAction(e-> addMoney() );
     }
     private void setUP() {
 
+    }
+    private void addMoney() {
+        money++;
     }
     @Override
     protected String getTitle() {
