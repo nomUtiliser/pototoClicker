@@ -30,4 +30,7 @@ public class SaveHandler {
             CounterHandler.loadEmptySave();
         }
     }
+    public static void mkNewSave() {
+
+    }
 }
