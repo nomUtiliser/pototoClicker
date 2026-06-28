@@ -5,8 +5,6 @@ import net.minheur.potoflux.utils.Json;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.PototoClickerLogCategories;
 
-import javax.imageio.IIOException;
-import javax.swing.text.StringContent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
