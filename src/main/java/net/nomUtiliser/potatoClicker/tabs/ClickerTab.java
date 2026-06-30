@@ -7,6 +7,7 @@ import net.minheur.potoflux.translations.Translations;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 
 
 public class ClickerTab extends BaseVTab<VBox> {
@@ -16,7 +17,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         PANEL = new VBox();
         PANEL.getStyleClass().add("pototoClicker");
     }
-    protected int money;
+
     private Label moenyPanel;
     @Override
     protected void setPanel() {
@@ -35,8 +36,9 @@ public class ClickerTab extends BaseVTab<VBox> {
     }
 
     private void addMoney(int addedMoneyAmount) {
-        money+= addedMoneyAmount;
-        moenyPanel.setText(Functions.formatMessage("$$1 patate", money));
+        if (CounterHandler.getSave() == null) return;
+        CounterHandler.getSave().potatoCount += addedMoneyAmount;
+        moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
     }
     @Override
     protected String getTitle() {

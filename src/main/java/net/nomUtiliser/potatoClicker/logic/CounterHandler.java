@@ -1,15 +1,20 @@
 package net.nomUtiliser.potatoClicker.logic;
 
-public class CounterHandler {
-    public static void loadSave(Save save) {
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+public class CounterHandler {
+    private static Save save;
+
+    public static void loadSave(@NotNull Save save) {
+        CounterHandler.save = save;
     }
 
     public static void loadEmptySave() {
-
+        save = new Save();
     }
 
-    public static Save getSave() {
-        return null;
+    public static @Nullable Save getSave() {
+        return save;
     }
 }
