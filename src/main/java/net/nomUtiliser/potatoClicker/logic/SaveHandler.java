@@ -32,7 +32,12 @@ public class SaveHandler {
     }
     public static void mkNewSave() {
         CounterHandler.loadEmptySave();
+        saveToFile();
+    }
+    public static void saveToFile() {
         Save save = CounterHandler.getSave();
+        if (save == null) return;
+
         String content = Json.GSON.toJson(save);
         try {
             Files.writeString(savePath, content);
