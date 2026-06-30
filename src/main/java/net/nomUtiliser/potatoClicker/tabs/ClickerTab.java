@@ -29,7 +29,8 @@ public class ClickerTab extends BaseVTab<VBox> {
         moenyPanel= new Label();
         moenyPanel.setMaxSize(250, 60);
         moenyPanel.setPrefSize(250, 30);
-        moenyPanel.setText("0 patate");
+        if (CounterHandler.getSave() == null) return;
+        moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
 
         vContent.getChildren().addAll(potato,moenyPanel);
         potato.setOnAction(e-> addMoney(1) );
