@@ -37,15 +37,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         vContent.getChildren().addAll(potato,moenyPanel);
         potato.setOnAction(e-> addMoney(1) );
     }
-    private void setSTats() {
-        Path statDir = PotatoClicker.getModDir().resolve("save.json");
-        try {
-            if (!Files.exists(statDir)) {
-                PtfLogger.warning("No save file found!", PototoClickerLogCategories.SAVE);
-            }
 
-        }
-    }
     private void addMoney(int addedMoneyAmount) {
         money+= addedMoneyAmount;
         moenyPanel.setText(Functions.formatMessage("$$1 patate", money));

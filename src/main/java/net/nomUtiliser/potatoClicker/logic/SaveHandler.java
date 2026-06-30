@@ -31,6 +31,14 @@ public class SaveHandler {
         }
     }
     public static void mkNewSave() {
-
+        CounterHandler.loadEmptySave();
+        Save save = CounterHandler.getSave();
+        String content = Json.GSON.toJson(save);
+        try {
+            Files.writeString(savePath, content);
+        } catch (IOException e) {
+            e.printStackTrace();
+            PtfLogger.error("Failed to create new file", PototoClickerLogCategories.SAVE);
+        }
     }
 }

@@ -9,4 +9,7 @@ public class CounterHandler {
 
     }
 
+    public static Save getSave() {
+        return null;
+    }
 }
