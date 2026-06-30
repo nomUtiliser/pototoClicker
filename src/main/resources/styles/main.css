@@ -1,0 +1,8 @@
+.pototoClicker {
+    -fx-background-color: linear-gradient(to bottom, #ffd300, #ff8400);
+}
+
+.pototoClicker .potatoSacred {
+    -fx-background-color: #FFFF00;
+
+}

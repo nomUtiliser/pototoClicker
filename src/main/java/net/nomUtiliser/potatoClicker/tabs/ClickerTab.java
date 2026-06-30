@@ -14,12 +14,14 @@ public class ClickerTab extends BaseVTab<VBox> {
     @Override
     protected void instantiate() {
         PANEL = new VBox();
+        PANEL.getStyleClass().add("pototoClicker");
     }
     protected int money;
     private Label moenyPanel;
     @Override
     protected void setPanel() {
         potato= new Button();
+        potato.getStyleClass().add("potatoSacred");
         potato.setMaxSize(250, 60);
         potato.setPrefSize(250, 30);
         potato.setText("patate");

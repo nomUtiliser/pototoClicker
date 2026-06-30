@@ -7,6 +7,7 @@ import net.minheur.potoflux.loader.mod.ModEventBus;
 import net.minheur.potoflux.loader.mod.events.RegisterLangEvent;
 import net.minheur.potoflux.logger.LogCategories;
 import net.minheur.potoflux.logger.PtfLogger;
+import net.nomUtiliser.potatoClicker.style.PototoStylesheets;
 import net.nomUtiliser.potatoClicker.tabs.Tabs;
 import net.nomUtiliser.potatoClicker.translations.ExampleModTranslations;
 
@@ -22,6 +23,7 @@ public class PotatoClicker {
     public PotatoClicker() {
         ModEventBus modEventBus = PotoFluxLoadingContext.get().getModEventBus();
 
+        modEventBus.addListener(PototoStylesheets::register);
         modEventBus.addListener(Tabs::register);
         modEventBus.addListener(this::onRegisterLang);
     }
