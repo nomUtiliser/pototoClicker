@@ -6,7 +6,6 @@ import net.minheur.potoflux.screen.tabs.Tab;
 import net.minheur.potoflux.utils.SmartSupplier;
 import net.minheur.potoflux.utils.ressourcelocation.ResourceLocation;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
-import net.nomUtiliser.potatoClicker.tabs.all.ClickerTab;
 
 public class Tabs {
     private static final RegistryList<Tab> LIST = new RegistryList<>();

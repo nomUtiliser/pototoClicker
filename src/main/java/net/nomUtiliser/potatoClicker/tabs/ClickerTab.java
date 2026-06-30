@@ -1,18 +1,12 @@
-package net.nomUtiliser.potatoClicker.tabs.all;
+package net.nomUtiliser.potatoClicker.tabs;
 
 import javafx.scene.layout.VBox;
 import net.minheur.potoflux.Functions;
-import net.minheur.potoflux.logger.PtfLogger;
 import net.minheur.potoflux.screen.tabs.BaseVTab;
 import net.minheur.potoflux.translations.Translations;
-import java.awt.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import net.nomUtiliser.potatoClicker.PotatoClicker;
-import net.nomUtiliser.potatoClicker.PototoClickerLogCategories;
 
 
 public class ClickerTab extends BaseVTab<VBox> {
