@@ -1,5 +1,6 @@
 package net.nomUtiliser.potatoClicker.logic;
 
+import net.nomUtiliser.potatoClicker.logic.data.Save;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

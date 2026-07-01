@@ -4,6 +4,7 @@ import net.minheur.potoflux.logger.PtfLogger;
 import net.minheur.potoflux.utils.Json;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.PototoClickerLogCategories;
+import net.nomUtiliser.potatoClicker.logic.data.Save;
 
 import java.io.IOException;
 import java.nio.file.Files;
