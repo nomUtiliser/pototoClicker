@@ -7,7 +7,6 @@ import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
 import net.nomUtiliser.potatoClicker.upgrades.Clicker;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
 
 public class Upgrades {
     public static final RegistryList<AbstractUpgrade> LIST = new RegistryList<>();
