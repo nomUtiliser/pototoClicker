@@ -11,6 +11,9 @@ import net.nomUtiliser.potatoClicker.actionRun.PototoClickerRun;
 import net.nomUtiliser.potatoClicker.style.PototoStylesheets;
 import net.nomUtiliser.potatoClicker.tabs.Tabs;
 import net.nomUtiliser.potatoClicker.translations.ExampleModTranslations;
+import net.nomUtiliser.potatoClicker.upgrades.reg.Events;
+import net.nomUtiliser.potatoClicker.upgrades.reg.RegisterUpgradesEvent;
+import net.nomUtiliser.potatoClicker.upgrades.reg.Upgrades;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,10 +23,13 @@ import java.util.Properties;
 @Mod(modId = PotatoClicker.MOD_ID, version = "1.0", compatibleVersionUrl = "https://nomutiliser.github.io/nomutiliser/pototoClicker/version.json")
 public class PotatoClicker {
     public static final String MOD_ID = "potatoClicker";
+    public static final RegisterUpgradesEvent upgradesEvent = new RegisterUpgradesEvent();
 
     public PotatoClicker() {
         ModEventBus modEventBus = PotoFluxLoadingContext.get().getModEventBus();
 
+        modEventBus.addListener(Upgrades::register);
+        modEventBus.addListener(Events::register);
         modEventBus.addListener(PototoClickerRun::register);
         modEventBus.addListener(PototoStylesheets::register);
         modEventBus.addListener(Tabs::register);
