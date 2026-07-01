@@ -6,3 +6,43 @@
     -fx-background-color: #FFFF00;
 
 }
+
+.pototoClicker .pototoPanel {
+    -fx-background-color: #ef9204;
+    -fx-padding: 10;
+    -fx-border-color: #ff9800;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.pototoClicker .upgrade-item {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10;
+    -fx-border-color: #ff9800;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+}
+
+.pototoClicker .upgrade-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.pototoClicker .upgrade-cost {
+    -fx-text-fill: #666666;
+    -fx-font-size: 12px;
+}
+
+.pototoClicker .button-container {
+    -fx-alignment: center-left;
+}
+
+.pototoClicker .purchase-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
