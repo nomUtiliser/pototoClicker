@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 
+import java.math.BigInteger;
+
 
 public class ClickerTab extends BaseVTab<VBox> {
     private Button potato;
@@ -38,7 +40,7 @@ public class ClickerTab extends BaseVTab<VBox> {
 
     private void addMoney(int addedMoneyAmount) {
         if (CounterHandler.getSave() == null) return;
-        CounterHandler.getSave().potatoCount += addedMoneyAmount;
+        CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(BigInteger.valueOf(addedMoneyAmount));
         moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
     }
     @Override
