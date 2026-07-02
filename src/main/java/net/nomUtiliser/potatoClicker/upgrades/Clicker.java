@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 public class Clicker extends AbstractUpgrade {
     public Clicker() {
-        super(BigInteger.valueOf(10));
+        super(BigInteger.valueOf(10), "Clicker");
     }
 
     @Override

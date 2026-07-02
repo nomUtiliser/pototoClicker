@@ -11,10 +11,15 @@ import net.minheur.potoflux.Functions;
 import net.minheur.potoflux.logger.PtfLogger;
 import net.minheur.potoflux.screen.tabs.BaseVTab;
 import net.minheur.potoflux.translations.Translations;
+import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
+import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
+import net.nomUtiliser.potatoClicker.upgrades.reg.UpgradesRegistry;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 
 public class ClickerTab extends BaseVTab<VBox> {
@@ -34,17 +39,7 @@ public class ClickerTab extends BaseVTab<VBox> {
     protected void setPanel() {
         upgradesContainer = new VBox(10);
         // Add more upgrade items to make the container larger
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 1", "Cost: 10 patates", 10));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 2", "Cost: 50 patates", 50));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 3", "Cost: 100 patates", 100));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 4", "Cost: 500 patates", 500));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 5", "Cost: 1000 patates", 1000));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 6", "Cost: 5000 patates", 5000));
-        // Add some more items to ensure the container is large enough for scrolling
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 7", "Cost: 10000 patates", 10000));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 8", "Cost: 50000 patates", 50000));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 9", "Cost: 100000 patates", 100000));
-        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 10", "Cost: 500000 patates", 500000));
+        addUpgrades();
 
         // Set container size to ensure adequate height
         upgradesContainer.setPrefHeight(1000);
@@ -97,14 +92,23 @@ public class ClickerTab extends BaseVTab<VBox> {
         potatoImg.setOnMouseClicked(e -> addMoney(1));
     }
 
-    private void loadUpgrade() {
+    private void addUpgrades() {
+        List<AbstractUpgrade> allUpgrades = PotatoClicker.upgradesEvent.reg.getAll()
+                .stream().sorted(
+                        Comparator.comparing(
+                                upgrade-> !upgrade.id().getNamespace().equals(PotatoClicker.MOD_ID)
+                        )
+                ).toList();
 
+        for (AbstractUpgrade upgrade : allUpgrades) {
+            upgradesContainer.getChildren().add(createUpgradeItem(upgrade.getName(), upgrade.getBaseCost()));
+        }
     }
 
     /**
      * Creates a styled upgrade item with name, cost, and purchase button
      */
-    private VBox createUpgradeItem(String name, String cost, int costValue) {
+    private VBox createUpgradeItem(String name, BigInteger costValue) {
         // Create main container for the upgrade item
         VBox upgradeBox = new VBox(5);
         upgradeBox.getStyleClass().add("upgrade-item");
@@ -114,7 +118,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         nameLabel.getStyleClass().add("upgrade-name");
         
         // Cost label
-        Label costLabel = new Label(cost);
+        Label costLabel = new Label(Functions.formatMessage("cost: $$1 potatoes", costValue));
         costLabel.getStyleClass().add("upgrade-cost");
         
         // Purchase button
@@ -125,8 +129,8 @@ public class ClickerTab extends BaseVTab<VBox> {
             // Handle purchase logic here
             if (CounterHandler.getSave() != null) {
                 // Example purchase logic - check if player has enough potatoes
-                if (CounterHandler.getSave().potatoCount.compareTo(BigInteger.valueOf(costValue)) >= 0) {
-                    CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(BigInteger.valueOf(costValue));
+                if (CounterHandler.getSave().potatoCount.compareTo(costValue) >= 0) {
+                    CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(costValue);
                     moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
                     // Update UI accordingly (this would be extended in a real implementation)
                 }
@@ -141,6 +145,10 @@ public class ClickerTab extends BaseVTab<VBox> {
         upgradeBox.getChildren().addAll(nameLabel, costLabel, buttonContainer);
         
         return upgradeBox;
+    }
+
+    private void buyUpgrade(String name) {
+
     }
 
     private void addMoney(int addedMoneyAmount) {
