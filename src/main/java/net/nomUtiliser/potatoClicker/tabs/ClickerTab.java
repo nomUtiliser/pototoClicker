@@ -1,9 +1,11 @@
 package net.nomUtiliser.potatoClicker.tabs;
 
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import javafx.scene.control.Label;
 import net.minheur.potoflux.Functions;
 import net.minheur.potoflux.logger.PtfLogger;
@@ -16,9 +18,10 @@ import java.util.Arrays;
 
 
 public class ClickerTab extends BaseVTab<VBox> {
-    private Button potato;
+    private ImageView potatoImg;
     private ScrollPane scrollPane;
     private VBox upgradesContainer;
+    
     @Override
     protected void instantiate() {
         PANEL = new VBox();
@@ -26,39 +29,72 @@ public class ClickerTab extends BaseVTab<VBox> {
     }
 
     private Label moenyPanel;
+    
     @Override
     protected void setPanel() {
         upgradesContainer = new VBox(10);
-        // Add some upgrade items with better styling
+        // Add more upgrade items to make the container larger
         upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 1", "Cost: 10 patates", 10));
         upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 2", "Cost: 50 patates", 50));
         upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 3", "Cost: 100 patates", 100));
         upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 4", "Cost: 500 patates", 500));
         upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 5", "Cost: 1000 patates", 1000));
         upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 6", "Cost: 5000 patates", 5000));
+        // Add some more items to ensure the container is large enough for scrolling
+        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 7", "Cost: 10000 patates", 10000));
+        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 8", "Cost: 50000 patates", 50000));
+        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 9", "Cost: 100000 patates", 100000));
+        upgradesContainer.getChildren().add(createUpgradeItem("Upgrade 10", "Cost: 500000 patates", 500000));
 
-
+        // Set container size to ensure adequate height
+        upgradesContainer.setPrefHeight(1000);
+        upgradesContainer.setPrefWidth(200);
+        upgradesContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
         scrollPane = new ScrollPane(upgradesContainer);
         scrollPane.setFitToWidth(true);
         scrollPane.setContent(upgradesContainer);
-        scrollPane.setMaxSize(320, 500);
-        scrollPane.setPrefHeight(500);
-        scrollPane.setPrefWidth(320);
-        scrollPane.setStyle("-fx-background-color: transparent; -fx-padding: 5;");
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        upgradesContainer.getStyleClass().add("pototoPanel");
-        potato= new Button();
-        potato.getStyleClass().add("potatoSacred");
-        potato.setMaxSize(100, 60);
-        potato.setPrefSize(100, 30);
-        potato.setText("patate");
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-padding: 5;");
+        scrollPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
+        // Make the scroll pane take up all available space in the HBox
+        VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(upgradesContainer, javafx.scene.layout.Priority.ALWAYS);
+        
+        // Load potato image from resources
+        try {
+            Image potatoImage = new Image("textures/pototo.png");
+            potatoImg = new ImageView(potatoImage);
+            potatoImg.setFitWidth(100);
+            potatoImg.setFitHeight(60);
+            potatoImg.setPreserveRatio(true);
+        } catch (Exception e) {
+            // If image loading fails, create a simple label as fallback
+            potatoImg = new ImageView();
+            System.err.println("Failed to load potato image: " + e.getMessage());
+        }
+        
         moenyPanel= new Label();
         moenyPanel.setMaxSize(250, 60);
         moenyPanel.setPrefSize(250, 30);
-        if (CounterHandler.getSave() == null) return;
-        moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
-        vContent.getChildren().addAll(potato,moenyPanel,scrollPane);
-        potato.setOnAction(e-> addMoney(1) );
+        if (CounterHandler.getSave()== null) return;
+        moenyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
+        
+        // Create HBox to put ScrollPane on the right side with proper stretching
+        HBox mainContainer = new HBox();
+        mainContainer.setMinHeight(400);
+        mainContainer.getChildren().addAll(potatoImg, moenyPanel, scrollPane);
+        mainContainer.setSpacing(10);
+        mainContainer.getStyleClass().add("main-container");
+        mainContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        HBox.setHgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(potatoImg, javafx.scene.layout.Priority.NEVER);
+        HBox.setHgrow(moenyPanel, javafx.scene.layout.Priority.NEVER);
+        
+        vContent.getChildren().add(mainContainer);
+        potatoImg.setOnMouseClicked(e -> addMoney(1));
     }
 
     private void loadUpgrade() {
@@ -112,6 +148,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(BigInteger.valueOf(addedMoneyAmount));
         moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
     }
+    
     @Override
     protected String getTitle() {
         return Translations.get("potatoClicker:tabs.clicker.title");

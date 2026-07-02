@@ -12,7 +12,7 @@ public class CounterHandler {
     }
 
     public static void loadEmptySave() {
-        save = new Save();
+        save = Save.mkNewEmptySave();
     }
 
     public static @Nullable Save getSave() {
