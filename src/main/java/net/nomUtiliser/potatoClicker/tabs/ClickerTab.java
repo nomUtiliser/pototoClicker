@@ -101,15 +101,17 @@ public class ClickerTab extends BaseVTab<VBox> {
                 ).toList();
 
         for (AbstractUpgrade upgrade : allUpgrades) {
-            upgradesContainer.getChildren().add(createUpgradeItem(upgrade.getName(), upgrade.getBaseCost()));
+            upgradesContainer.getChildren().add(createUpgradeItem(upgrade));
         }
     }
 
     /**
      * Creates a styled upgrade item with name, cost, and purchase button
      */
-    private VBox createUpgradeItem(String name, BigInteger costValue) {
+    private VBox createUpgradeItem(AbstractUpgrade upgrade) {
         // Create main container for the upgrade item
+        String name = upgrade.getName();
+        BigInteger costValue = upgrade.getBaseCost();
         VBox upgradeBox = new VBox(5);
         upgradeBox.getStyleClass().add("upgrade-item");
         
@@ -131,6 +133,7 @@ public class ClickerTab extends BaseVTab<VBox> {
                 // Example purchase logic - check if player has enough potatoes
                 if (CounterHandler.getSave().potatoCount.compareTo(costValue) >= 0) {
                     CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(costValue);
+                    buyUpgrade(upgrade);
                     moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
                     // Update UI accordingly (this would be extended in a real implementation)
                 }
@@ -147,7 +150,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         return upgradeBox;
     }
 
-    private void buyUpgrade(String name) {
+    private void buyUpgrade(AbstractUpgrade upgrade) {
 
     }
 
