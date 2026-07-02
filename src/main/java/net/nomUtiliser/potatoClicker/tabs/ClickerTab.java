@@ -8,16 +8,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.control.Label;
 import net.minheur.potoflux.Functions;
-import net.minheur.potoflux.logger.PtfLogger;
 import net.minheur.potoflux.screen.tabs.BaseVTab;
 import net.minheur.potoflux.translations.Translations;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
-import net.nomUtiliser.potatoClicker.upgrades.reg.UpgradesRegistry;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 

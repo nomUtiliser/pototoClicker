@@ -3,7 +3,6 @@ package net.nomUtiliser.potatoClicker.logic.data;
 import com.google.gson.annotations.SerializedName;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
