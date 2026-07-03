@@ -28,7 +28,7 @@ public class Save {
         for (AbstractUpgrade u : allUpgrades) {
             s.upgrades[i] = new Upgrade();
             s.upgrades[i].id = u.getName();
-            s.upgrades[i].quantity = 0;
+            s.upgrades[i].quantity = BigInteger.valueOf(0);
             i++;
         }
         s.potatoCount = BigInteger.valueOf(0);

@@ -8,15 +8,21 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.control.Label;
 import net.minheur.potoflux.Functions;
+import net.minheur.potoflux.logger.PtfLogger;
 import net.minheur.potoflux.screen.tabs.BaseVTab;
 import net.minheur.potoflux.translations.Translations;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
+import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
+import net.nomUtiliser.potatoClicker.upgrades.reg.Upgrades;
 
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class ClickerTab extends BaseVTab<VBox> {
@@ -30,7 +36,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         PANEL.getStyleClass().add("pototoClicker");
     }
 
-    private Label moenyPanel;
+    private Label moneyPanel;
     
     @Override
     protected void setPanel() {
@@ -59,34 +65,36 @@ public class ClickerTab extends BaseVTab<VBox> {
         try {
             Image potatoImage = new Image("textures/pototo.png");
             potatoImg = new ImageView(potatoImage);
-            potatoImg.setFitWidth(100);
-            potatoImg.setFitHeight(60);
+            potatoImg.setFitWidth(200);
+            potatoImg.setFitHeight(200);
             potatoImg.setPreserveRatio(true);
         } catch (Exception e) {
             // If image loading fails, create a simple label as fallback
             potatoImg = new ImageView();
+            PtfLogger.error("Failed to load potato");
             System.err.println("Failed to load potato image: " + e.getMessage());
         }
         
-        moenyPanel= new Label();
-        moenyPanel.setMaxSize(250, 60);
-        moenyPanel.setPrefSize(250, 30);
+        moneyPanel = new Label();
+        moneyPanel.setMaxSize(100, 60);
+        moneyPanel.setPrefSize(100, 30);
+        moneyPanel.getStyleClass().add("moneyPanel");
         if (CounterHandler.getSave()== null) return;
-        moenyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
+        moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
         
         // Create HBox to put ScrollPane on the right side with proper stretching
         HBox mainContainer = new HBox();
         mainContainer.setMinHeight(400);
-        mainContainer.getChildren().addAll(potatoImg, moenyPanel, scrollPane);
+        mainContainer.getChildren().addAll(potatoImg, moneyPanel, scrollPane);
         mainContainer.setSpacing(10);
         mainContainer.getStyleClass().add("main-container");
-        mainContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        mainContainer.setMaxSize(700, Double.MAX_VALUE);
         HBox.setHgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         HBox.setHgrow(potatoImg, javafx.scene.layout.Priority.NEVER);
-        HBox.setHgrow(moenyPanel, javafx.scene.layout.Priority.NEVER);
+        HBox.setHgrow(moneyPanel, javafx.scene.layout.Priority.NEVER);
         
         vContent.getChildren().add(mainContainer);
-        potatoImg.setOnMouseClicked(e -> addMoney(1));
+        potatoImg.setOnMouseClicked(e -> addMoney(BigInteger.valueOf(1)));
     }
 
     private void addUpgrades() {
@@ -96,9 +104,9 @@ public class ClickerTab extends BaseVTab<VBox> {
                                 upgrade-> !upgrade.id().getNamespace().equals(PotatoClicker.MOD_ID)
                         )
                 ).toList();
-
         for (AbstractUpgrade upgrade : allUpgrades) {
             upgradesContainer.getChildren().add(createUpgradeItem(upgrade));
+            addUpgradeIncome(upgrade);
         }
     }
 
@@ -115,11 +123,12 @@ public class ClickerTab extends BaseVTab<VBox> {
         // Upgrade name label
         Label nameLabel = new Label(name);
         nameLabel.getStyleClass().add("upgrade-name");
-        
+        // quantity label
+        Label quanLabel = new Label(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
+        quanLabel.getStyleClass().add("upgrade-quantity");
         // Cost label
         Label costLabel = new Label(Functions.formatMessage("cost: $$1 potatoes", costValue));
         costLabel.getStyleClass().add("upgrade-cost");
-        
         // Purchase button
         Button purchaseButton = new Button("Buy");
         purchaseButton.getStyleClass().add("purchase-button");
@@ -131,7 +140,8 @@ public class ClickerTab extends BaseVTab<VBox> {
                 if (CounterHandler.getSave().potatoCount.compareTo(costValue) >= 0) {
                     CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(costValue);
                     buyUpgrade(upgrade);
-                    moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
+                    quanLabel.setText(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
+                    moneyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
                     // Update UI accordingly (this would be extended in a real implementation)
                 }
             }
@@ -142,19 +152,50 @@ public class ClickerTab extends BaseVTab<VBox> {
         buttonContainer.getChildren().add(purchaseButton);
         buttonContainer.getStyleClass().add("button-container");
         
-        upgradeBox.getChildren().addAll(nameLabel, costLabel, buttonContainer);
+        upgradeBox.getChildren().addAll(nameLabel, quanLabel, costLabel, buttonContainer);
         
         return upgradeBox;
     }
 
-    private void buyUpgrade(AbstractUpgrade upgrade) {
 
+    public void addUpgradeIncome(AbstractUpgrade upgrade) {
+
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        try {
+            System.out.println("added");
+            scheduler.scheduleAtFixedRate(() -> {
+                addMoney(upgrade.getBaseIncome());
+            }, 0, 1, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void addMoney(int addedMoneyAmount) {
+    private String getQuantityUpgrade(AbstractUpgrade upgrade) {
+        assert CounterHandler.getSave() != null;
+        for (Upgrade u : CounterHandler.getSave().upgrades) {
+            if (upgrade.getName().equals(u.id)) {
+                return u.quantity.toString();
+            }
+        }
+        return "0";
+    }
+
+    private void buyUpgrade(AbstractUpgrade upgrade) {
+        assert CounterHandler.getSave() != null;
+        for (Upgrade u : CounterHandler.getSave().upgrades) {
+            if (upgrade.getName().equals(u.id)) {
+                u.quantity = u.quantity.add(BigInteger.valueOf(1));
+                break;
+            }
+        }
+    }
+
+    private void addMoney(BigInteger addedMoneyAmount) {
         if (CounterHandler.getSave() == null) return;
-        CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(BigInteger.valueOf(addedMoneyAmount));
-        moenyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
+        CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(addedMoneyAmount);
+        moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
     }
     
     @Override

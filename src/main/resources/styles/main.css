@@ -17,9 +17,9 @@
 
 .pototoClicker .upgrade-item {
     -fx-background-color: #ffffff;
-    -fx-padding: 10;
+    -fx-padding: 8;
     -fx-border-color: #ff9800;
-    -fx-border-width: 1;
+    -fx-border-width: 3;
     -fx-border-radius: 5;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
 }
@@ -45,4 +45,15 @@
     -fx-font-weight: bold;
     -fx-border-radius: 3;
     -fx-background-radius: 3;
+}
+
+.pototoClicker .upgrade-quantity {
+    -fx-font-size: 14px;
+    -fx-text-fill: #ff7817;
+}
+
+.pototoClicker .moneyPanel {
+    -fx-border-color: #f1af4d;
+    -fx-border-width: 3;
+    -fx-border-radius: 20;
 }
