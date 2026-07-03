@@ -19,6 +19,7 @@ import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
 import net.nomUtiliser.potatoClicker.upgrades.reg.Upgrades;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -117,7 +118,8 @@ public class ClickerTab extends BaseVTab<VBox> {
     private VBox createUpgradeItem(AbstractUpgrade upgrade) {
         // Create main container for the upgrade item
         String name = upgrade.getName();
-        BigInteger costValue = upgrade.getBaseCost();
+        assert CounterHandler.getSave() != null;
+        BigInteger costValue = Arrays.stream(CounterHandler.getSave().upgrades).filter(u -> upgrade.getName().equals(u.id)).findFirst().map(u -> upgrade.getBaseCost().multiply(u.quantity)).orElse(BigInteger.valueOf(Long.MAX_VALUE));
         VBox upgradeBox = new VBox(5);
         upgradeBox.getStyleClass().add("upgrade-item");
         
@@ -147,7 +149,6 @@ public class ClickerTab extends BaseVTab<VBox> {
                 }
             }
         });
-        
         // Add components to the upgrade box
         HBox buttonContainer = new HBox(5);
         buttonContainer.getChildren().add(purchaseButton);
@@ -160,7 +161,6 @@ public class ClickerTab extends BaseVTab<VBox> {
 
 
     public void addUpgradeIncome(AbstractUpgrade upgrade) {
-
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(() -> {
             Platform.runLater(() -> {
@@ -193,6 +193,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         for (Upgrade u : CounterHandler.getSave().upgrades) {
             if (upgrade.getName().equals(u.id)) {
                 u.quantity = u.quantity.add(BigInteger.valueOf(1));
+
                 break;
             }
         }
