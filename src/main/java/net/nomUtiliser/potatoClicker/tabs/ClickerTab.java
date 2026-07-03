@@ -1,5 +1,6 @@
 package net.nomUtiliser.potatoClicker.tabs;
 
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
@@ -161,15 +162,20 @@ public class ClickerTab extends BaseVTab<VBox> {
     public void addUpgradeIncome(AbstractUpgrade upgrade) {
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-        try {
-            System.out.println("added");
-            scheduler.scheduleAtFixedRate(() -> {
-                addMoney(upgrade.getBaseIncome());
-            }, 0, 1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                try {
+                    for (Upgrade u : CounterHandler.getSave().upgrades) {
+                        if (upgrade.getName().equals(u.id)) {
+                            addMoney(upgrade.getBaseIncome().multiply(u.quantity));
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+    }, 0, 1, TimeUnit.SECONDS);
     }
 
     private String getQuantityUpgrade(AbstractUpgrade upgrade) {
