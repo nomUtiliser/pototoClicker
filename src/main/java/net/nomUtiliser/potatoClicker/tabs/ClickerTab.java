@@ -16,22 +16,30 @@ import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
-import net.nomUtiliser.potatoClicker.upgrades.reg.Upgrades;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.math.RoundingMode;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-
 public class ClickerTab extends BaseVTab<VBox> {
+    private Map<AbstractUpgrade, Label> costLabels;
+
+    private Map<AbstractUpgrade, Label> getCostLabels() {
+        if (costLabels == null) {
+            costLabels = new HashMap<>();
+        }
+        return costLabels;
+    }
     private ImageView potatoImg;
     private ScrollPane scrollPane;
     private VBox upgradesContainer;
-    
+    private Label pototoPerSec;
+    private Map<String, ScheduledFuture<?>> schedulersMap;
     @Override
     protected void instantiate() {
         PANEL = new VBox();
@@ -42,15 +50,18 @@ public class ClickerTab extends BaseVTab<VBox> {
     
     @Override
     protected void setPanel() {
+        schedulersMap = new HashMap<>();
         upgradesContainer = new VBox(10);
         // Add more upgrade items to make the container larger
         addUpgrades();
-
         // Set container size to ensure adequate height
         upgradesContainer.setPrefHeight(1000);
         upgradesContainer.setPrefWidth(200);
         upgradesContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        
+        pototoPerSec = new Label("O Potatoes/s");
+        pototoPerSec.setPrefSize(300, 20);
+        pototoPerSec.setMaxSize(300, 20);
+        pototoPerSec.setMinSize(300,20);
         scrollPane = new ScrollPane(upgradesContainer);
         scrollPane.setFitToWidth(true);
         scrollPane.setContent(upgradesContainer);
@@ -76,7 +87,6 @@ public class ClickerTab extends BaseVTab<VBox> {
             PtfLogger.error("Failed to load potato");
             System.err.println("Failed to load potato image: " + e.getMessage());
         }
-        
         moneyPanel = new Label();
         moneyPanel.setMaxSize(100, 60);
         moneyPanel.setPrefSize(100, 30);
@@ -95,7 +105,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         HBox.setHgrow(potatoImg, javafx.scene.layout.Priority.NEVER);
         HBox.setHgrow(moneyPanel, javafx.scene.layout.Priority.NEVER);
         
-        vContent.getChildren().add(mainContainer);
+        vContent.getChildren().addAll(pototoPerSec, mainContainer);
         potatoImg.setOnMouseClicked(e -> addMoney(BigInteger.valueOf(1)));
     }
 
@@ -115,11 +125,11 @@ public class ClickerTab extends BaseVTab<VBox> {
     /**
      * Creates a styled upgrade item with name, cost, and purchase button
      */
+
     private VBox createUpgradeItem(AbstractUpgrade upgrade) {
         // Create main container for the upgrade item
         String name = upgrade.getName();
         assert CounterHandler.getSave() != null;
-        BigInteger costValue = Arrays.stream(CounterHandler.getSave().upgrades).filter(u -> upgrade.getName().equals(u.id)).findFirst().map(u -> upgrade.getBaseCost().multiply(u.quantity)).orElse(BigInteger.valueOf(Long.MAX_VALUE));
         VBox upgradeBox = new VBox(5);
         upgradeBox.getStyleClass().add("upgrade-item");
         
@@ -130,19 +140,22 @@ public class ClickerTab extends BaseVTab<VBox> {
         Label quanLabel = new Label(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
         quanLabel.getStyleClass().add("upgrade-quantity");
         // Cost label
-        Label costLabel = new Label(Functions.formatMessage("cost: $$1 potatoes", costValue));
+        Label costLabel = new Label(Functions.formatMessage("cost: $$1 potatoes", calculateCost(upgrade)));
         costLabel.getStyleClass().add("upgrade-cost");
+        getCostLabels().put(upgrade, costLabel);
         // Purchase button
         Button purchaseButton = new Button("Buy");
         purchaseButton.getStyleClass().add("purchase-button");
+        purchaseButton.getStyleClass().add(Functions.formatMessage(".$$1-purchaseButton", name));
         purchaseButton.setPrefSize(80, 25);
         purchaseButton.setOnAction(e -> {
             // Handle purchase logic here
             if (CounterHandler.getSave() != null) {
                 // Example purchase logic - check if player has enough potatoes
-                if (CounterHandler.getSave().potatoCount.compareTo(costValue) >= 0) {
-                    CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(costValue);
+                if (CounterHandler.getSave().potatoCount.compareTo(calculateCost(upgrade)) >= 0) {
+                    CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(calculateCost(upgrade));
                     buyUpgrade(upgrade);
+                    refreshCost(upgrade);
                     quanLabel.setText(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
                     moneyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
                     // Update UI accordingly (this would be extended in a real implementation)
@@ -153,21 +166,22 @@ public class ClickerTab extends BaseVTab<VBox> {
         HBox buttonContainer = new HBox(5);
         buttonContainer.getChildren().add(purchaseButton);
         buttonContainer.getStyleClass().add("button-container");
-        
         upgradeBox.getChildren().addAll(nameLabel, quanLabel, costLabel, buttonContainer);
-        
         return upgradeBox;
     }
 
-
     public void addUpgradeIncome(AbstractUpgrade upgrade) {
+        if (schedulersMap.containsKey(upgrade.getName())) {
+            schedulersMap.get(upgrade.getName()).cancel(false);
+        }
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(() -> {
+        ScheduledFuture<?> task= scheduler.scheduleAtFixedRate(() -> {
             Platform.runLater(() -> {
                 try {
                     for (Upgrade u : CounterHandler.getSave().upgrades) {
                         if (upgrade.getName().equals(u.id)) {
                             addMoney(upgrade.getBaseIncome().multiply(u.quantity));
+                            pototoPerSec.setText(Functions.formatMessage("$$1 Potatoes/S", upgrade.getBaseIncome().multiply(u.quantity)));
                             break;
                         }
                     }
@@ -176,6 +190,7 @@ public class ClickerTab extends BaseVTab<VBox> {
                 }
             });
     }, 0, 1, TimeUnit.SECONDS);
+        schedulersMap.put(upgrade.getName(), task);
     }
 
     private String getQuantityUpgrade(AbstractUpgrade upgrade) {
@@ -188,18 +203,39 @@ public class ClickerTab extends BaseVTab<VBox> {
         return "0";
     }
 
+    public BigInteger calculateNewPrice(BigInteger price, double multiply) {
+        BigDecimal newPrice = new BigDecimal(price).multiply(new BigDecimal(multiply));
+        return newPrice.setScale(0, RoundingMode.CEILING).toBigInteger();
+    };
+
+    private void refreshCost(AbstractUpgrade upgrade) {
+        Label label = getCostLabels().get(upgrade);
+        if (label != null) {
+            label.setText(Functions.formatMessage("cost: $$1 potatoes", calculateCost(upgrade)));
+        }
+    }
+
+    private BigInteger calculateCost(AbstractUpgrade upgrade) {
+        assert CounterHandler.getSave() != null;
+        return Arrays.stream(CounterHandler.getSave().upgrades)
+                .filter(u -> upgrade.getName().equals(u.id))
+                .findFirst()
+                .map(u -> calculateNewPrice(upgrade.getBaseCost().multiply(u.quantity), 1.7))
+                .orElse(BigInteger.valueOf(Long.MAX_VALUE));
+    }
+
     private void buyUpgrade(AbstractUpgrade upgrade) {
         assert CounterHandler.getSave() != null;
         for (Upgrade u : CounterHandler.getSave().upgrades) {
             if (upgrade.getName().equals(u.id)) {
                 u.quantity = u.quantity.add(BigInteger.valueOf(1));
-
+                addUpgradeIncome(upgrade);
                 break;
             }
         }
     }
 
-    private void addMoney(BigInteger addedMoneyAmount) {
+    public void addMoney(BigInteger addedMoneyAmount) {
         if (CounterHandler.getSave() == null) return;
         CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(addedMoneyAmount);
         moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
