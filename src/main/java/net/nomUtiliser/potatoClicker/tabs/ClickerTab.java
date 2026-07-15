@@ -262,7 +262,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(addedMoneyAmount);
         moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
     }
-    
+
     @Override
     protected String getTitle() {
         return Translations.get("potatoClicker:tabs.clicker.title");
