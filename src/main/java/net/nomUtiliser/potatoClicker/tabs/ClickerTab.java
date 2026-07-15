@@ -3,6 +3,7 @@ package net.nomUtiliser.potatoClicker.tabs;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.ImageView;
@@ -40,6 +41,7 @@ public class ClickerTab extends BaseVTab<VBox> {
     private VBox upgradesContainer;
     private Label pototoPerSec;
     private Map<String, ScheduledFuture<?>> schedulersMap;
+    private Map<String, BigInteger> pototoPerSecMap;
     @Override
     protected void instantiate() {
         PANEL = new VBox();
@@ -71,8 +73,8 @@ public class ClickerTab extends BaseVTab<VBox> {
         scrollPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         
         // Make the scroll pane take up all available space in the HBox
-        VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
-        VBox.setVgrow(upgradesContainer, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        VBox.setVgrow(upgradesContainer, Priority.ALWAYS);
         
         // Load potato image from resources
         try {
@@ -101,9 +103,9 @@ public class ClickerTab extends BaseVTab<VBox> {
         mainContainer.setSpacing(10);
         mainContainer.getStyleClass().add("main-container");
         mainContainer.setMaxSize(700, Double.MAX_VALUE);
-        HBox.setHgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(potatoImg, javafx.scene.layout.Priority.NEVER);
-        HBox.setHgrow(moneyPanel, javafx.scene.layout.Priority.NEVER);
+        HBox.setHgrow(scrollPane, Priority.ALWAYS);
+        HBox.setHgrow(potatoImg, Priority.NEVER);
+        HBox.setHgrow(moneyPanel, Priority.NEVER);
         
         vContent.getChildren().addAll(pototoPerSec, mainContainer);
         potatoImg.setOnMouseClicked(e -> addMoney(BigInteger.valueOf(1)));
@@ -119,6 +121,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         for (AbstractUpgrade upgrade : allUpgrades) {
             upgradesContainer.getChildren().add(createUpgradeItem(upgrade));
             addUpgradeIncome(upgrade);
+            calPototoPerSec(upgrade);
         }
     }
 
@@ -170,6 +173,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         return upgradeBox;
     }
 
+
     public void addUpgradeIncome(AbstractUpgrade upgrade) {
         if (schedulersMap.containsKey(upgrade.getName())) {
             schedulersMap.get(upgrade.getName()).cancel(false);
@@ -178,19 +182,36 @@ public class ClickerTab extends BaseVTab<VBox> {
         ScheduledFuture<?> task= scheduler.scheduleAtFixedRate(() -> {
             Platform.runLater(() -> {
                 try {
+                    assert CounterHandler.getSave() != null;
                     for (Upgrade u : CounterHandler.getSave().upgrades) {
                         if (upgrade.getName().equals(u.id)) {
                             addMoney(upgrade.getBaseIncome().multiply(u.quantity));
+
                             pototoPerSec.setText(Functions.formatMessage("$$1 Potatoes/S", upgrade.getBaseIncome().multiply(u.quantity)));
-                            break;
                         }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
             });
     }, 0, 1, TimeUnit.SECONDS);
         schedulersMap.put(upgrade.getName(), task);
+    }
+
+    private void calPototoPerSec(AbstractUpgrade upgrade) {
+        try {
+            assert CounterHandler.getSave() != null;
+            for (Upgrade u : CounterHandler.getSave().upgrades) {
+                if (upgrade.getName().equals(u.id)) {
+                    pototoPerSecMap.remove(upgrade.getName());
+                    pototoPerSecMap.put(upgrade.getName(), upgrade.getBaseIncome().multiply(u.quantity));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     private String getQuantityUpgrade(AbstractUpgrade upgrade) {
@@ -221,7 +242,7 @@ public class ClickerTab extends BaseVTab<VBox> {
                 .filter(u -> upgrade.getName().equals(u.id))
                 .findFirst()
                 .map(u -> calculateNewPrice(upgrade.getBaseCost().multiply(u.quantity), 1.7))
-                .orElse(BigInteger.valueOf(Long.MAX_VALUE));
+                .orElse(BigInteger.valueOf(-1));
     }
 
     private void buyUpgrade(AbstractUpgrade upgrade) {
@@ -230,6 +251,7 @@ public class ClickerTab extends BaseVTab<VBox> {
             if (upgrade.getName().equals(u.id)) {
                 u.quantity = u.quantity.add(BigInteger.valueOf(1));
                 addUpgradeIncome(upgrade);
+                refreshCost(upgrade);
                 break;
             }
         }
