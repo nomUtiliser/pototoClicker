@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 public class Farm extends AbstractUpgrade{
     public Farm() {
-        super(BigInteger.valueOf(500), "Farm", BigInteger.valueOf(10));
+        super(BigInteger.valueOf(500), "Farm", BigInteger.valueOf(20));
     }
 
 

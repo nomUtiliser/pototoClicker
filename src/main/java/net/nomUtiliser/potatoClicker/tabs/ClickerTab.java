@@ -3,6 +3,7 @@ package net.nomUtiliser.potatoClicker.tabs;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
@@ -18,9 +19,13 @@ import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -138,13 +143,27 @@ public class ClickerTab extends BaseVTab<VBox> {
      * Creates a styled upgrade item with name, cost, and purchase button
      */
 
-    private VBox createUpgradeItem(AbstractUpgrade upgrade) {
+    private HBox createUpgradeItem(AbstractUpgrade upgrade) {
         // Create main container for the upgrade item
         String name = upgrade.getName();
         assert CounterHandler.getSave() != null;
         VBox upgradeBox = new VBox(5);
-        upgradeBox.getStyleClass().add("upgrade-item");
-        
+        HBox rightPart = new HBox(5);
+        rightPart.getStyleClass().add("upgrade-item");
+        Image img;
+        URL ress = getClass().getResource(Functions.formatMessage("/textures/$$1.png", upgrade.getName()));
+        System.out.println(ress);
+        if (ress!= null) {
+            img = new Image(Functions.formatMessage("textures/$$1.png", upgrade.getName()));
+        } else {
+            img = new Image("textures/noImgFound.png");
+        }
+        Pane space = new Pane();
+        space.setMinWidth(100);
+        ImageView UpgradeImg = new ImageView(img);
+        UpgradeImg.setFitWidth(80);
+        UpgradeImg.setFitHeight(80);
+        UpgradeImg.setPreserveRatio(true);
         // Upgrade name label
         Label nameLabel = new Label(name);
         nameLabel.getStyleClass().add("upgrade-name");
@@ -165,11 +184,10 @@ public class ClickerTab extends BaseVTab<VBox> {
             if (CounterHandler.getSave() != null) {
                 // Example purchase logic - check if player has enough potatoes
                 if (CounterHandler.getSave().potatoCount.compareTo(calculateCost(upgrade)) >= 0) {
-                    CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(calculateCost(upgrade));
+                    removeMoney(calculateCost(upgrade));
                     buyUpgrade(upgrade);
                     refreshCost(upgrade);
                     quanLabel.setText(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
-                    moneyPanel.setText(Functions.formatMessage("$$1 patate", CounterHandler.getSave().potatoCount));
                     // Update UI accordingly (this would be extended in a real implementation)
                 }
             }
@@ -179,9 +197,26 @@ public class ClickerTab extends BaseVTab<VBox> {
         buttonContainer.getChildren().add(purchaseButton);
         buttonContainer.getStyleClass().add("button-container");
         upgradeBox.getChildren().addAll(nameLabel, quanLabel, costLabel, buttonContainer);
-        return upgradeBox;
+        rightPart.getChildren().addAll(upgradeBox, space, UpgradeImg);
+        return rightPart;
     }
 
+    public String getPototoUnits (BigInteger potato) {
+        BigDecimal money = new BigDecimal(potato);
+        String prefix = "";
+        if (potato.compareTo(BigInteger.valueOf(1_000_000_000)) >= 0) {
+            money = money.divide(BigDecimal.valueOf(1_000_000_000), 1 , RoundingMode.DOWN);
+            prefix= "B";
+        } else if (potato.compareTo(BigInteger.valueOf(1_000_000)) >= 0) {
+            money = money.divide(BigDecimal.valueOf(1_000_000), 1 , RoundingMode.DOWN);
+            prefix= "M";
+        } else if (potato.compareTo(BigInteger.valueOf(1_000)) >= 0) {
+            money = money.divide(BigDecimal.valueOf(1_000), 1, RoundingMode.DOWN);
+            prefix= "K";
+        }
+        String moneyText = Functions.formatMessage("$$1$$2", money, prefix);
+        return moneyText;
+    }
 
     public void addUpgradeIncome(AbstractUpgrade upgrade) {
         if (schedulersMap.containsKey(upgrade.getName())) {
@@ -200,9 +235,8 @@ public class ClickerTab extends BaseVTab<VBox> {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             });
-        }, 0, 1, TimeUnit.SECONDS);
+        }, (long) (Math.random() * 1000), 1000, TimeUnit.MILLISECONDS);
             schedulersMap.put(upgrade.getName(), task);
     }
 
@@ -225,7 +259,7 @@ public class ClickerTab extends BaseVTab<VBox> {
                     e.printStackTrace();
                 }
             });
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 0, 100, TimeUnit.MILLISECONDS);
         schedulersMap.put("pototoPerSecInt", task);
     }
 
@@ -279,8 +313,15 @@ public class ClickerTab extends BaseVTab<VBox> {
     public void addMoney(BigInteger addedMoneyAmount) {
         if (CounterHandler.getSave() == null) return;
         CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(addedMoneyAmount);
-        moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
+        moneyPanel.setText(Functions.formatMessage("$$1 potatoes", getPototoUnits(CounterHandler.getSave().potatoCount)));
     }
+
+    public void removeMoney(BigInteger rmMoneyAount) {
+        assert CounterHandler.getSave() != null;
+        CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(rmMoneyAount);
+        moneyPanel.setText(Functions.formatMessage("$$1 potatoes", getPototoUnits(CounterHandler.getSave().potatoCount)));
+    }
+
 
     @Override
     protected String getTitle() {

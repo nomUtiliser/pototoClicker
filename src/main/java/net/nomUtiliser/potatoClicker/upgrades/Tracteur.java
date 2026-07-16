@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 public class Tracteur extends AbstractUpgrade{
     public Tracteur() {
-        super(BigInteger.valueOf(100), "Tracteur", BigInteger.valueOf(5));
+        super(BigInteger.valueOf(100), "Tracteur", BigInteger.valueOf(10));
     }
     @Override
     public ResourceLocation id() {

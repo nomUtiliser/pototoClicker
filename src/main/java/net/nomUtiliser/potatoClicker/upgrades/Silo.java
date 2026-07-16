@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 public class Silo extends AbstractUpgrade{
     public Silo() {
-        super(BigInteger.valueOf(2000), "silo de patate", BigInteger.valueOf(10));
+        super(BigInteger.valueOf(2000), "silo de patate", BigInteger.valueOf(25));
     }
 
     @Override
