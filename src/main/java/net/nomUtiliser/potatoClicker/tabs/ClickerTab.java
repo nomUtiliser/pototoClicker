@@ -41,7 +41,7 @@ public class ClickerTab extends BaseVTab<VBox> {
     private VBox upgradesContainer;
     private Label pototoPerSec;
     private Map<String, ScheduledFuture<?>> schedulersMap;
-    private Map<String, BigInteger> pototoPerSecMap;
+    private BigInteger pototoPerSecInt;
     @Override
     protected void instantiate() {
         PANEL = new VBox();
@@ -55,7 +55,11 @@ public class ClickerTab extends BaseVTab<VBox> {
         schedulersMap = new HashMap<>();
         upgradesContainer = new VBox(10);
         // Add more upgrade items to make the container larger
-        addUpgrades();
+        try {
+            addUpgrades();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         // Set container size to ensure adequate height
         upgradesContainer.setPrefHeight(1000);
         upgradesContainer.setPrefWidth(200);
@@ -111,17 +115,22 @@ public class ClickerTab extends BaseVTab<VBox> {
         potatoImg.setOnMouseClicked(e -> addMoney(BigInteger.valueOf(1)));
     }
 
-    private void addUpgrades() {
+    private void addUpgrades() throws InterruptedException {
+        if (CounterHandler.getSave() ==null) {
+            Thread.sleep(500);
+            addUpgrades();
+            return;
+        }
         List<AbstractUpgrade> allUpgrades = PotatoClicker.upgradesEvent.reg.getAll()
                 .stream().sorted(
                         Comparator.comparing(
                                 upgrade-> !upgrade.id().getNamespace().equals(PotatoClicker.MOD_ID)
                         )
                 ).toList();
+        calPototoPerSec(allUpgrades);
         for (AbstractUpgrade upgrade : allUpgrades) {
             upgradesContainer.getChildren().add(createUpgradeItem(upgrade));
             addUpgradeIncome(upgrade);
-            calPototoPerSec(upgrade);
         }
     }
 
@@ -186,8 +195,6 @@ public class ClickerTab extends BaseVTab<VBox> {
                     for (Upgrade u : CounterHandler.getSave().upgrades) {
                         if (upgrade.getName().equals(u.id)) {
                             addMoney(upgrade.getBaseIncome().multiply(u.quantity));
-
-                            pototoPerSec.setText(Functions.formatMessage("$$1 Potatoes/S", upgrade.getBaseIncome().multiply(u.quantity)));
                         }
                     }
                 } catch (Exception e) {
@@ -195,23 +202,31 @@ public class ClickerTab extends BaseVTab<VBox> {
                 }
 
             });
-    }, 0, 1, TimeUnit.SECONDS);
-        schedulersMap.put(upgrade.getName(), task);
+        }, 0, 1, TimeUnit.SECONDS);
+            schedulersMap.put(upgrade.getName(), task);
     }
 
-    private void calPototoPerSec(AbstractUpgrade upgrade) {
-        try {
-            assert CounterHandler.getSave() != null;
-            for (Upgrade u : CounterHandler.getSave().upgrades) {
-                if (upgrade.getName().equals(u.id)) {
-                    pototoPerSecMap.remove(upgrade.getName());
-                    pototoPerSecMap.put(upgrade.getName(), upgrade.getBaseIncome().multiply(u.quantity));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void calPototoPerSec(List<AbstractUpgrade> allUpgrade) {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        ScheduledFuture<?> task= scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                try {
+                    pototoPerSecInt = BigInteger.valueOf(0);
+                    for (AbstractUpgrade upgrade : allUpgrade) {
+                        for (Upgrade u : CounterHandler.getSave().upgrades) {
+                            if (upgrade.getName().equals(u.id)) {
+                                pototoPerSecInt = pototoPerSecInt.add(upgrade.getBaseIncome().multiply(u.quantity));
+                            }
+                        }
+                    }
+                    pototoPerSec.setText(Functions.formatMessage("$$1 Potatoes/S", pototoPerSecInt));
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }, 0, 1, TimeUnit.SECONDS);
+        schedulersMap.put("pototoPerSecInt", task);
     }
 
     private String getQuantityUpgrade(AbstractUpgrade upgrade) {
@@ -224,9 +239,14 @@ public class ClickerTab extends BaseVTab<VBox> {
         return "0";
     }
 
-    public BigInteger calculateNewPrice(BigInteger price, double multiply) {
-        BigDecimal newPrice = new BigDecimal(price).multiply(new BigDecimal(multiply));
-        return newPrice.setScale(0, RoundingMode.CEILING).toBigInteger();
+    public BigInteger calculateNewPrice(BigInteger price, double multiply, BigInteger upgradeNumber) {
+        BigDecimal newPrice = new BigDecimal(price).multiply(new BigDecimal(upgradeNumber)).multiply(new BigDecimal(multiply));
+        if (Objects.equals(upgradeNumber, BigInteger.valueOf(0))) {
+            return price;
+        } else {
+            return newPrice.setScale(0, RoundingMode.CEILING).toBigInteger();
+        }
+
     };
 
     private void refreshCost(AbstractUpgrade upgrade) {
@@ -241,7 +261,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         return Arrays.stream(CounterHandler.getSave().upgrades)
                 .filter(u -> upgrade.getName().equals(u.id))
                 .findFirst()
-                .map(u -> calculateNewPrice(upgrade.getBaseCost().multiply(u.quantity), 1.7))
+                .map(u -> calculateNewPrice(upgrade.getBaseCost(), 1.7, u.quantity))
                 .orElse(BigInteger.valueOf(-1));
     }
 
@@ -251,7 +271,6 @@ public class ClickerTab extends BaseVTab<VBox> {
             if (upgrade.getName().equals(u.id)) {
                 u.quantity = u.quantity.add(BigInteger.valueOf(1));
                 addUpgradeIncome(upgrade);
-                refreshCost(upgrade);
                 break;
             }
         }

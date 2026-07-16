@@ -5,12 +5,14 @@ import net.nomUtiliser.potatoClicker.PotatoClicker;
 
 import java.math.BigInteger;
 
-public class Tracteur extends AbstractUpgrade{
-    public Tracteur() {
-        super(BigInteger.valueOf(100), "Tracteur", BigInteger.valueOf(5));
+public class Farm extends AbstractUpgrade{
+    public Farm() {
+        super(BigInteger.valueOf(500), "Farm", BigInteger.valueOf(10));
     }
+
+
     @Override
     public ResourceLocation id() {
-        return new ResourceLocation(PotatoClicker.MOD_ID, "tracteur");
+        return new ResourceLocation(PotatoClicker.MOD_ID, "farm");
     }
 }
