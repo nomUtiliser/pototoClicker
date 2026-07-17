@@ -12,7 +12,7 @@ import java.math.RoundingMode;
 public class MoneyManager {
     ClickerTab clicker = new ClickerTab();
 
-    private String getPototoUnits (BigInteger potato) {
+    public String getPototoUnits (BigInteger potato) {
         BigDecimal money = new BigDecimal(potato);
         String prefix = "";
         if (potato.compareTo(BigInteger.valueOf(1_000_000_000)) >= 0) {
