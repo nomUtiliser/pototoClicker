@@ -20,7 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-@Mod(modId = PotatoClicker.MOD_ID, version = "1.0", compatibleVersionUrl = "https://nomutiliser.github.io/nomutiliser/pototoClicker/version.json")
+@Mod(modId = PotatoClicker.MOD_ID, version = "1.0", compatibleVersions = {"8.0.1"}, compatibleVersionUrl = "https://nomutiliser.github.io/nomutiliser/pototoClicker/version.json")
 public class PotatoClicker {
     public static final String MOD_ID = "potatoClicker";
     public static final RegisterUpgradesEvent upgradesEvent = new RegisterUpgradesEvent();

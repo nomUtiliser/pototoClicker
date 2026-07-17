@@ -18,14 +18,12 @@ import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
+import net.nomUtiliser.potatoClicker.utility.MoneyManager;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,6 +39,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         }
         return costLabels;
     }
+    private final MoneyManager moneyManager = new MoneyManager();
     private ImageView potatoImg;
     private ScrollPane scrollPane;
     private VBox upgradesContainer;
@@ -54,7 +53,9 @@ public class ClickerTab extends BaseVTab<VBox> {
     }
 
     private Label moneyPanel;
-    
+    public void setMoneyPanelPototo(String text) {
+        moneyPanel.setText(text);
+    }
     @Override
     protected void setPanel() {
         schedulersMap = new HashMap<>();
@@ -117,7 +118,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         HBox.setHgrow(moneyPanel, Priority.NEVER);
         
         vContent.getChildren().addAll(pototoPerSec, mainContainer);
-        potatoImg.setOnMouseClicked(e -> addMoney(BigInteger.valueOf(1)));
+        potatoImg.setOnMouseClicked(e -> moneyManager.addMoney(BigInteger.valueOf(1)));
     }
 
     private void addUpgrades() throws InterruptedException {
@@ -184,7 +185,7 @@ public class ClickerTab extends BaseVTab<VBox> {
             if (CounterHandler.getSave() != null) {
                 // Example purchase logic - check if player has enough potatoes
                 if (CounterHandler.getSave().potatoCount.compareTo(calculateCost(upgrade)) >= 0) {
-                    removeMoney(calculateCost(upgrade));
+                    moneyManager.removeMoney(calculateCost(upgrade));
                     buyUpgrade(upgrade);
                     refreshCost(upgrade);
                     quanLabel.setText(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
@@ -201,24 +202,8 @@ public class ClickerTab extends BaseVTab<VBox> {
         return rightPart;
     }
 
-    public String getPototoUnits (BigInteger potato) {
-        BigDecimal money = new BigDecimal(potato);
-        String prefix = "";
-        if (potato.compareTo(BigInteger.valueOf(1_000_000_000)) >= 0) {
-            money = money.divide(BigDecimal.valueOf(1_000_000_000), 1 , RoundingMode.DOWN);
-            prefix= "B";
-        } else if (potato.compareTo(BigInteger.valueOf(1_000_000)) >= 0) {
-            money = money.divide(BigDecimal.valueOf(1_000_000), 1 , RoundingMode.DOWN);
-            prefix= "M";
-        } else if (potato.compareTo(BigInteger.valueOf(1_000)) >= 0) {
-            money = money.divide(BigDecimal.valueOf(1_000), 1, RoundingMode.DOWN);
-            prefix= "K";
-        }
-        String moneyText = Functions.formatMessage("$$1$$2", money, prefix);
-        return moneyText;
-    }
 
-    public void addUpgradeIncome(AbstractUpgrade upgrade) {
+    private void addUpgradeIncome(AbstractUpgrade upgrade) {
         if (schedulersMap.containsKey(upgrade.getName())) {
             schedulersMap.get(upgrade.getName()).cancel(false);
         }
@@ -229,7 +214,7 @@ public class ClickerTab extends BaseVTab<VBox> {
                     assert CounterHandler.getSave() != null;
                     for (Upgrade u : CounterHandler.getSave().upgrades) {
                         if (upgrade.getName().equals(u.id)) {
-                            addMoney(upgrade.getBaseIncome().multiply(u.quantity));
+                            moneyManager.addMoney(upgrade.getBaseIncome().multiply(u.quantity));
                         }
                     }
                 } catch (Exception e) {
@@ -273,7 +258,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         return "0";
     }
 
-    public BigInteger calculateNewPrice(BigInteger price, double multiply, BigInteger upgradeNumber) {
+    private BigInteger calculateNewPrice(BigInteger price, double multiply, BigInteger upgradeNumber) {
         BigDecimal newPrice = new BigDecimal(price).multiply(new BigDecimal(upgradeNumber)).multiply(new BigDecimal(multiply));
         if (Objects.equals(upgradeNumber, BigInteger.valueOf(0))) {
             return price;
@@ -308,18 +293,6 @@ public class ClickerTab extends BaseVTab<VBox> {
                 break;
             }
         }
-    }
-
-    public void addMoney(BigInteger addedMoneyAmount) {
-        if (CounterHandler.getSave() == null) return;
-        CounterHandler.getSave().potatoCount =CounterHandler.getSave().potatoCount.add(addedMoneyAmount);
-        moneyPanel.setText(Functions.formatMessage("$$1 potatoes", getPototoUnits(CounterHandler.getSave().potatoCount)));
-    }
-
-    public void removeMoney(BigInteger rmMoneyAount) {
-        assert CounterHandler.getSave() != null;
-        CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(rmMoneyAount);
-        moneyPanel.setText(Functions.formatMessage("$$1 potatoes", getPototoUnits(CounterHandler.getSave().potatoCount)));
     }
 
 
