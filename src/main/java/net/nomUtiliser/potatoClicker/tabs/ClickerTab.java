@@ -33,11 +33,14 @@ import java.util.concurrent.TimeUnit;
 public class ClickerTab extends BaseVTab<VBox> {
     private Map<AbstractUpgrade, Label> costLabels;
 
-    private Map<AbstractUpgrade, Label> getCostLabels() {
+    public Map<AbstractUpgrade, Label> getCostLabels() {
         if (costLabels == null) {
             costLabels = new HashMap<>();
         }
         return costLabels;
+    }
+    public Map<String, ScheduledFuture<?>> getSchedulersMap() {
+        return schedulersMap;
     }
     private final MoneyManager moneyManager = new MoneyManager();
     private ImageView potatoImg;

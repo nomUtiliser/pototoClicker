@@ -1,5 +1,6 @@
 package net.nomUtiliser.potatoClicker.utility;
 
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -18,19 +19,16 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class UpgradeManager {
     ClickerTab clicker = new ClickerTab();
     MoneyManager moneyManager = new MoneyManager();
-    private Map<AbstractUpgrade, Label> getCostLabels() {
-        if (costLabels == null) {
-            costLabels = new HashMap<>();
-        }
-        return costLabels;
-    }
+
     public HBox createUpgradeItem(AbstractUpgrade upgrade) {
         // Create main container for the upgrade item
         String name = upgrade.getName();
@@ -61,7 +59,7 @@ public class UpgradeManager {
         // Cost label
         Label costLabel = new Label(Functions.formatMessage("cost: $$1 potatoes", calculateCost(upgrade)));
         costLabel.getStyleClass().add("upgrade-cost");
-        getCostLabels().put(upgrade, costLabel);
+        clicker.getCostLabels().put(upgrade, costLabel);
         // Purchase button
         Button purchaseButton = new Button("Buy");
         purchaseButton.getStyleClass().add("purchase-button");
@@ -100,7 +98,7 @@ public class UpgradeManager {
     };
 
     public void refreshCost(AbstractUpgrade upgrade) {
-        Label label = getCostLabels().get(upgrade);
+        Label label = clicker.getCostLabels().get(upgrade);
         if (label != null) {
             label.setText(Functions.formatMessage("cost: $$1 potatoes", calculateCost(upgrade)));
         }
@@ -132,5 +130,26 @@ public class UpgradeManager {
                 break;
             }
         }
+    }
+    private void addUpgradeIncome(AbstractUpgrade upgrade) {
+        if (clicker.getSchedulersMap().containsKey(upgrade.getName())) {
+            clicker.getSchedulersMap().get(upgrade.getName()).cancel(false);
+        }
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        ScheduledFuture<?> task= scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                try {
+                    assert CounterHandler.getSave() != null;
+                    for (Upgrade u : CounterHandler.getSave().upgrades) {
+                        if (upgrade.getName().equals(u.id)) {
+                            moneyManager.addMoney(upgrade.getBaseIncome().multiply(u.quantity));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }, (long) (Math.random() * 1000), 1000, TimeUnit.MILLISECONDS);
+        clicker.getSchedulersMap().put(upgrade.getName(), task);
     }
 }
