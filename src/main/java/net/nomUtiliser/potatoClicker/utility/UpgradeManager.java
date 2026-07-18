@@ -9,16 +9,20 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.minheur.potoflux.Functions;
+import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.tabs.ClickerTab;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
+import net.nomUtiliser.potatoClicker.upgrades.Clicker;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,9 +30,32 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class UpgradeManager {
-    ClickerTab clicker = new ClickerTab();
-    MoneyManager moneyManager = new MoneyManager();
+    private final ClickerTab clicker;
+    private final MoneyManager moneyManager;
+    public UpgradeManager(ClickerTab clicker) {
+        this.clicker = clicker;
+        moneyManager = new MoneyManager(clicker);
+    }
 
+
+    public void addUpgrades() throws InterruptedException {
+        if (CounterHandler.getSave() ==null) {
+            Thread.sleep(500);
+            addUpgrades();
+            return;
+        }
+        List<AbstractUpgrade> allUpgrades = PotatoClicker.upgradesEvent.reg.getAll()
+                .stream().sorted(
+                        Comparator.comparing(
+                                upgrade-> !upgrade.id().getNamespace().equals(PotatoClicker.MOD_ID)
+                        )
+                ).toList();
+        moneyManager.calPototoPerSec(allUpgrades);
+        for (AbstractUpgrade upgrade : allUpgrades) {
+            clicker.getUpgradesContainer().getChildren().add(createUpgradeItem(upgrade));
+            addUpgradeIncome(upgrade);
+        }
+    }
     public HBox createUpgradeItem(AbstractUpgrade upgrade) {
         // Create main container for the upgrade item
         String name = upgrade.getName();
@@ -54,10 +81,10 @@ public class UpgradeManager {
         Label nameLabel = new Label(name);
         nameLabel.getStyleClass().add("upgrade-name");
         // quantity label
-        Label quanLabel = new Label(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
+        Label quanLabel = new Label(Functions.formatMessage("Quantity: $$1", moneyManager.getPototoUnits(getQuantityUpgrade(upgrade))));
         quanLabel.getStyleClass().add("upgrade-quantity");
         // Cost label
-        Label costLabel = new Label(Functions.formatMessage("cost: $$1 potatoes", calculateCost(upgrade)));
+        Label costLabel = new Label(Functions.formatMessage("cost: $$1 potatoes", moneyManager.getPototoUnits(calculateCost(upgrade))));
         costLabel.getStyleClass().add("upgrade-cost");
         clicker.getCostLabels().put(upgrade, costLabel);
         // Purchase button
@@ -100,17 +127,17 @@ public class UpgradeManager {
     public void refreshCost(AbstractUpgrade upgrade) {
         Label label = clicker.getCostLabels().get(upgrade);
         if (label != null) {
-            label.setText(Functions.formatMessage("cost: $$1 potatoes", calculateCost(upgrade)));
+            label.setText(Functions.formatMessage("cost: $$1 potatoes", moneyManager.getPototoUnits(calculateCost(upgrade))));
         }
     }
-    public String getQuantityUpgrade(AbstractUpgrade upgrade) {
+    public BigInteger getQuantityUpgrade(AbstractUpgrade upgrade) {
         assert CounterHandler.getSave() != null;
         for (Upgrade u : CounterHandler.getSave().upgrades) {
             if (upgrade.getName().equals(u.id)) {
-                return u.quantity.toString();
+                return u.quantity;
             }
         }
-        return "0";
+        return BigInteger.valueOf(0);
     }
     public BigInteger calculateCost(AbstractUpgrade upgrade) {
         assert CounterHandler.getSave() != null;
@@ -131,6 +158,7 @@ public class UpgradeManager {
             }
         }
     }
+
     private void addUpgradeIncome(AbstractUpgrade upgrade) {
         if (clicker.getSchedulersMap().containsKey(upgrade.getName())) {
             clicker.getSchedulersMap().get(upgrade.getName()).cancel(false);
