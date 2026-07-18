@@ -1,9 +1,6 @@
 package net.nomUtiliser.potatoClicker.tabs;
 
-import javafx.application.Platform;
-import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
@@ -14,22 +11,14 @@ import net.minheur.potoflux.Functions;
 import net.minheur.potoflux.logger.PtfLogger;
 import net.minheur.potoflux.screen.tabs.BaseVTab;
 import net.minheur.potoflux.translations.Translations;
-import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
-import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
 import net.nomUtiliser.potatoClicker.utility.MoneyManager;
 import net.nomUtiliser.potatoClicker.utility.UpgradeManager;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.net.URL;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class ClickerTab extends BaseVTab<VBox> {
     private final UpgradeManager upgradeManager;
