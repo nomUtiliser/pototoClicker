@@ -1,6 +1,8 @@
 package net.nomUtiliser.potatoClicker.tabs;
 
+import com.sun.jdi.PrimitiveValue;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
@@ -46,7 +48,7 @@ public class ClickerTab extends BaseVTab<VBox> {
     public VBox getUpgradesContainer() {
         return upgradesContainer;
     }
-
+    private Pane pototoImgPane;
     private ImageView potatoImg;
     private ScrollPane scrollPane;
     private VBox upgradesContainer;
@@ -115,9 +117,11 @@ public class ClickerTab extends BaseVTab<VBox> {
         moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
         
         // Create HBox to put ScrollPane on the right side with proper stretching
+        Pane pototoImgPane = new Pane();
         HBox mainContainer = new HBox();
         mainContainer.setMinHeight(400);
-        mainContainer.getChildren().addAll(potatoImg, moneyPanel, scrollPane);
+        pototoImgPane.getChildren().add(potatoImg);
+        mainContainer.getChildren().addAll(pototoImgPane, moneyPanel, scrollPane);
         mainContainer.setSpacing(10);
         mainContainer.getStyleClass().add("main-container");
         mainContainer.setMaxSize(700, Double.MAX_VALUE);
@@ -126,7 +130,10 @@ public class ClickerTab extends BaseVTab<VBox> {
         HBox.setHgrow(moneyPanel, Priority.NEVER);
         
         vContent.getChildren().addAll(pototoPerSec, mainContainer);
-        potatoImg.setOnMouseClicked(e -> moneyManager.addMoney(BigInteger.valueOf(1)));
+        potatoImg.setOnMouseClicked(e -> {
+            moneyManager.addMoney(BigInteger.valueOf(1));
+            moneyManager.potatoClicked(pototoImgPane, e.getX(), e.getY());
+        });
     }
 
 

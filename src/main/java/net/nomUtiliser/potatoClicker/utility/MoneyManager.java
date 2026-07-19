@@ -1,6 +1,14 @@
 package net.nomUtiliser.potatoClicker.utility;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.util.Duration;
 import net.minheur.potoflux.Functions;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
@@ -74,5 +82,37 @@ public class MoneyManager {
         assert CounterHandler.getSave() != null;
         CounterHandler.getSave().potatoCount = CounterHandler.getSave().potatoCount.subtract(rmMoneyAount);
         clicker.setMoneyPanelPototo(Functions.formatMessage("$$1 potatoes", getPototoUnits(CounterHandler.getSave().potatoCount)));
+    }
+
+    public void potatoClicked(Pane pane, double mouseX, double mouseY) {
+
+        ImageView effect = new ImageView(new Image("textures/pototo.png"));
+        effect.setFitWidth(50);
+        effect.setFitHeight(50);
+
+
+        double offsetX = Math.random() * 20 - 20;
+        double offsetY = Math.random() * 20 - 20;
+        double directionX = Math.random() * 100 - 50;
+        double directionY = Math.random() * 100 - 50;
+        effect.setLayoutX(mouseX + offsetX);
+        effect.setLayoutY(mouseY + offsetY);
+
+        pane.getChildren().add(effect);
+
+        // Animation
+        FadeTransition fade = new FadeTransition(Duration.millis(1000), effect);
+        fade.setFromValue(1);
+        fade.setToValue(0.2);
+
+        TranslateTransition move = new TranslateTransition(Duration.millis(500), effect);
+        move.setByY(directionY);
+        move.setByX(directionX);
+
+        ParallelTransition animation = new ParallelTransition(fade, move);
+
+        animation.setOnFinished(e -> pane.getChildren().remove(effect));
+        animation.play();
+
     }
 }
