@@ -14,7 +14,6 @@ import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.tabs.ClickerTab;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
-import net.nomUtiliser.potatoClicker.upgrades.Clicker;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -65,7 +64,6 @@ public class UpgradeManager {
         rightPart.getStyleClass().add("upgrade-item");
         Image img;
         URL ress = getClass().getResource(Functions.formatMessage("/textures/$$1.png", upgrade.getName()));
-        System.out.println(ress);
         if (ress!= null) {
             img = new Image(Functions.formatMessage("textures/$$1.png", upgrade.getName()));
         } else {
@@ -100,7 +98,7 @@ public class UpgradeManager {
                     moneyManager.removeMoney(calculateCost(upgrade));
                     buyUpgrade(upgrade);
                     refreshCost(upgrade);
-                    quanLabel.setText(Functions.formatMessage("Quantity: $$1",getQuantityUpgrade(upgrade)));
+                    quanLabel.setText(Functions.formatMessage("Quantity: $$1",moneyManager.getPototoUnits(getQuantityUpgrade(upgrade))));
                     // Update UI accordingly (this would be extended in a real implementation)
                 }
             }
@@ -130,6 +128,7 @@ public class UpgradeManager {
             label.setText(Functions.formatMessage("cost: $$1 potatoes", moneyManager.getPototoUnits(calculateCost(upgrade))));
         }
     }
+
     public BigInteger getQuantityUpgrade(AbstractUpgrade upgrade) {
         assert CounterHandler.getSave() != null;
         for (Upgrade u : CounterHandler.getSave().upgrades) {

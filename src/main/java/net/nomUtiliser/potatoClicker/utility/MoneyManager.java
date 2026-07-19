@@ -1,8 +1,6 @@
 package net.nomUtiliser.potatoClicker.utility;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -28,11 +26,10 @@ import java.util.concurrent.TimeUnit;
 
 public class MoneyManager {
     private final ClickerTab clicker;
-
+    private Boolean animIsOn= false;
     public MoneyManager(ClickerTab clicker) {
         this.clicker = clicker;
     }
-
     public void calPototoPerSec(List<AbstractUpgrade> allUpgrade) {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         ScheduledFuture<?> task= scheduler.scheduleAtFixedRate(() -> {
@@ -85,7 +82,6 @@ public class MoneyManager {
     }
 
     public void potatoClicked(Pane pane, double mouseX, double mouseY) {
-
         ImageView effect = new ImageView(new Image("textures/pototo.png"));
         effect.setFitWidth(50);
         effect.setFitHeight(50);
@@ -113,6 +109,20 @@ public class MoneyManager {
 
         animation.setOnFinished(e -> pane.getChildren().remove(effect));
         animation.play();
+
+        if (animIsOn) return;
+        ScaleTransition anim = new ScaleTransition(Duration.millis(500), pane);
+        anim.setToX(1.2);
+        anim.setToY(1.2);
+
+        anim.setAutoReverse(true);
+        anim.setCycleCount(2);
+        anim.setInterpolator(Interpolator.EASE_OUT);
+        anim.setOnFinished( e ->
+                animIsOn = false
+        );
+        animIsOn = true;
+        anim.play();
 
     }
 }

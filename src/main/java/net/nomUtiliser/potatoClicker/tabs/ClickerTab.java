@@ -107,7 +107,6 @@ public class ClickerTab extends BaseVTab<VBox> {
             // If image loading fails, create a simple label as fallback
             potatoImg = new ImageView();
             PtfLogger.error("Failed to load potato");
-            System.err.println("Failed to load potato image: " + e.getMessage());
         }
         moneyPanel = new Label();
         moneyPanel.setMaxSize(100, 60);
