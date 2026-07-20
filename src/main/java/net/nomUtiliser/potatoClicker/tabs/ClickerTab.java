@@ -1,6 +1,5 @@
 package net.nomUtiliser.potatoClicker.tabs;
 
-import com.sun.jdi.PrimitiveValue;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -116,7 +115,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
         
         // Create HBox to put ScrollPane on the right side with proper stretching
-        Pane pototoImgPane = new Pane();
+        pototoImgPane = new Pane();
         HBox mainContainer = new HBox();
         mainContainer.setMinHeight(400);
         pototoImgPane.getChildren().add(potatoImg);

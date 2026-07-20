@@ -9,7 +9,6 @@ import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
 
-
 public class Save {
     @SerializedName("potatoes")
     public BigInteger potatoCount;
