@@ -21,7 +21,6 @@ import net.nomUtiliser.potatoClicker.utility.UpgradeManager;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 public class ClickerTab extends BaseVTab<VBox> {
     private final UpgradeManager upgradeManager;
