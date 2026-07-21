@@ -36,7 +36,6 @@ public class UpgradeManager {
         moneyManager = new MoneyManager(clicker);
     }
 
-
     public void addUpgrades() throws InterruptedException {
         if (CounterHandler.getSave() ==null) {
             Thread.sleep(500);
@@ -138,6 +137,7 @@ public class UpgradeManager {
         }
         return BigInteger.valueOf(0);
     }
+
     public BigInteger calculateCost(AbstractUpgrade upgrade) {
         assert CounterHandler.getSave() != null;
         return Arrays.stream(CounterHandler.getSave().upgrades)
@@ -160,7 +160,7 @@ public class UpgradeManager {
 
     private void addUpgradeIncome(AbstractUpgrade upgrade) {
         if (clicker.getSchedulersMap().containsKey(upgrade.getName())) {
-            clicker.getSchedulersMap().get(upgrade.getName()).cancel(false);
+            clicker.getSchedulersMap().get(upgrade.getName()).shutdown();
         }
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         ScheduledFuture<?> task= scheduler.scheduleAtFixedRate(() -> {
@@ -177,6 +177,6 @@ public class UpgradeManager {
                 }
             });
         }, (long) (Math.random() * 1000), 1000, TimeUnit.MILLISECONDS);
-        clicker.getSchedulersMap().put(upgrade.getName(), task);
+        clicker.getSchedulersMap().put(upgrade.getName(), scheduler);
     }
 }

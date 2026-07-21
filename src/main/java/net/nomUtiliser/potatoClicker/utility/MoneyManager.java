@@ -4,7 +4,6 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import net.minheur.potoflux.Functions;
@@ -12,7 +11,6 @@ import net.nomUtiliser.potatoClicker.logic.CounterHandler;
 import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.tabs.ClickerTab;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
-import net.nomUtiliser.potatoClicker.upgrades.Clicker;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,7 +47,7 @@ public class MoneyManager {
                 }
             });
         }, 0, 100, TimeUnit.MILLISECONDS);
-        clicker.getSchedulersMap().put("pototoPerSecInt", task);
+        clicker.getSchedulersMap().put("pototoPerSecInt", scheduler);
     }
 
     public String getPototoUnits (BigInteger potato) {

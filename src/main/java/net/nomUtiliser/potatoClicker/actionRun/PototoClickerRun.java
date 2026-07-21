@@ -21,6 +21,10 @@ public class PototoClickerRun {
             new ResourceLocation(PotatoClicker.MOD_ID, "load"), SaveHandler::loadFromFile
     ));
 
+    public static final SmartSupplier<ActionRun> CLOSE_SCHEDULER = LIST_CLOSE.add(()-> new ActionRun(
+            new ResourceLocation(PotatoClicker.MOD_ID,"scheduler"), SaveHandler::closeScheduler
+            ));
+
     public static void register(@NotNull RegisterRunsEvent event) {
         LIST_CLOSE.register(event.closeReg);
         LIST_START_LOGIC.register(event.startLogicReg);

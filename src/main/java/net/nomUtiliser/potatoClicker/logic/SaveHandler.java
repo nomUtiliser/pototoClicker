@@ -5,15 +5,21 @@ import net.minheur.potoflux.utils.Json;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.PototoClickerLogCategories;
 import net.nomUtiliser.potatoClicker.logic.data.Save;
+import net.nomUtiliser.potatoClicker.tabs.ClickerTab;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 public class SaveHandler {
 
     public static final Path savePath = PotatoClicker.getModDir().resolve("save.json");
-
+    private static ClickerTab clicker = null;
+    public SaveHandler(ClickerTab clicker) {
+        SaveHandler.clicker = clicker;
+    }
     public static void loadFromFile() {
         try {
             if (!Files.exists(savePath)) {
@@ -46,5 +52,13 @@ public class SaveHandler {
             e.printStackTrace();
             PtfLogger.error("Failed to create new file", PototoClickerLogCategories.SAVE);
         }
+    }
+
+    public static void closeScheduler() {
+        clicker.getSchedulersMap();
+        for (ScheduledExecutorService scheduledFuture : clicker.getSchedulersMap().values()) {
+            scheduledFuture.shutdown();
+        }
+
     }
 }

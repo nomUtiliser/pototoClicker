@@ -13,20 +13,24 @@ import net.minheur.potoflux.logger.PtfLogger;
 import net.minheur.potoflux.screen.tabs.BaseVTab;
 import net.minheur.potoflux.translations.Translations;
 import net.nomUtiliser.potatoClicker.logic.CounterHandler;
+import net.nomUtiliser.potatoClicker.logic.SaveHandler;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
 import net.nomUtiliser.potatoClicker.utility.MoneyManager;
 import net.nomUtiliser.potatoClicker.utility.UpgradeManager;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 public class ClickerTab extends BaseVTab<VBox> {
     private final UpgradeManager upgradeManager;
     private final MoneyManager moneyManager;
+    private final SaveHandler SaveHandler;
     public ClickerTab() throws InterruptedException {
         upgradeManager = new UpgradeManager(this);
         moneyManager = new MoneyManager(this);
+        SaveHandler = new SaveHandler(this);
         upgradeManager.addUpgrades();
     }
     private Map<AbstractUpgrade, Label> costLabels;
@@ -37,7 +41,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         }
         return costLabels;
     }
-    public Map<String, ScheduledFuture<?>> getSchedulersMap() {
+    public Map<String, ScheduledExecutorService> getSchedulersMap() {
         return schedulersMap;
     }
 
@@ -52,7 +56,7 @@ public class ClickerTab extends BaseVTab<VBox> {
     private ScrollPane scrollPane;
     private VBox upgradesContainer;
     private Label pototoPerSec;
-    private Map<String, ScheduledFuture<?>> schedulersMap;
+    private Map<String, ScheduledExecutorService> schedulersMap;
     private BigInteger pototoPerSecInt;
     public BigInteger getPototoPerSecInt() {
         return pototoPerSecInt;
