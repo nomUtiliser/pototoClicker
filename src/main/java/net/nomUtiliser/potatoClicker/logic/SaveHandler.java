@@ -5,11 +5,15 @@ import net.minheur.potoflux.utils.Json;
 import net.nomUtiliser.potatoClicker.PotatoClicker;
 import net.nomUtiliser.potatoClicker.PototoClickerLogCategories;
 import net.nomUtiliser.potatoClicker.logic.data.Save;
+import net.nomUtiliser.potatoClicker.logic.data.Upgrade;
 import net.nomUtiliser.potatoClicker.tabs.ClickerTab;
+import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class SaveHandler {
@@ -26,9 +30,25 @@ public class SaveHandler {
                 mkNewSave();
                 return;
             }
-
             String content = Files.readString(savePath);
             Save save = Json.GSON.fromJson(content, Save.class);
+            List<AbstractUpgrade> allUpgrades = PotatoClicker.upgradesEvent.reg.getAll()
+                    .stream().sorted(
+                            Comparator.comparing(
+                                    upgrade-> !upgrade.id().getNamespace().equals(PotatoClicker.MOD_ID)
+                            )
+                    ).toList();
+            for (AbstractUpgrade upgrade : allUpgrades) {
+                for (Upgrade u : save.upgrades) {
+                    if (!upgrade.getName().equals(u.id)) {
+                        System.out.println(upgrade.getName());
+                    }
+                }
+            }
+
+
+
+
             CounterHandler.loadSave(save);
         } catch (IOException e) {
             e.printStackTrace();
