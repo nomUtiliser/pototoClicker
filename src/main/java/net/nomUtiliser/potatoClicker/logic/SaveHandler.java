@@ -10,6 +10,7 @@ import net.nomUtiliser.potatoClicker.tabs.ClickerTab;
 import net.nomUtiliser.potatoClicker.upgrades.AbstractUpgrade;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -32,24 +33,35 @@ public class SaveHandler {
             }
             String content = Files.readString(savePath);
             Save save = Json.GSON.fromJson(content, Save.class);
+            Save newSave = new Save();
             List<AbstractUpgrade> allUpgrades = PotatoClicker.upgradesEvent.reg.getAll()
                     .stream().sorted(
                             Comparator.comparing(
                                     upgrade-> !upgrade.id().getNamespace().equals(PotatoClicker.MOD_ID)
                             )
                     ).toList();
+            newSave.upgrades = new Upgrade[allUpgrades.size()];
+            int i = 0;
             for (AbstractUpgrade upgrade : allUpgrades) {
+                boolean exist = false;
                 for (Upgrade u : save.upgrades) {
-                    if (!upgrade.getName().equals(u.id)) {
-                        System.out.println(upgrade.getName());
+                    if (upgrade.getName().equals(u.id)) {
+                        newSave.upgrades[i] = new Upgrade();
+                        newSave.upgrades[i].id = upgrade.getName();
+                        newSave.upgrades[i].quantity = u.quantity;
+                        exist = true;
+                        break;
                     }
                 }
+                if (!exist)  {
+                    System.out.println(upgrade.getName());
+                    newSave.upgrades[i] = new Upgrade();
+                    newSave.upgrades[i].id = upgrade.getName();
+                    newSave.upgrades[i].quantity = BigInteger.valueOf(0);
+                }
+                i++;
             }
-
-
-
-
-            CounterHandler.loadSave(save);
+            CounterHandler.loadSave(newSave);
         } catch (IOException e) {
             e.printStackTrace();
             PtfLogger.error("Failed to get save!", PototoClickerLogCategories.SAVE);
@@ -74,7 +86,6 @@ public class SaveHandler {
     }
 
     public static void closeScheduler() {
-        clicker.getSchedulersMap();
         for (ScheduledExecutorService scheduledFuture : clicker.getSchedulersMap().values()) {
             scheduledFuture.shutdown();
         }

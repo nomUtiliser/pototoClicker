@@ -8,7 +8,7 @@ import java.math.BigInteger;
 
 public class Grain extends AbstractUpgrade{
     public Grain() {
-        super(BigInteger.valueOf(5000), "Grain de palates dorée", BigInteger.valueOf(35));
+        super(BigInteger.valueOf(5000), "Grain de patate dorée", BigInteger.valueOf(35));
     }
 
     @Override

@@ -18,6 +18,8 @@ public class Upgrades {
 
     public static final SmartSupplier<AbstractUpgrade> SILO = LIST.add(Silo::new);
 
+public static final SmartSupplier<AbstractUpgrade> GRAIN = LIST.add(Grain::new);
+
     public static void register(@NotNull RegisterUpgradesEvent event) {
         LIST.register(event.reg);
     }
