@@ -41,6 +41,10 @@ public class SaveHandler {
                             )
                     ).toList();
             newSave.upgrades = new Upgrade[allUpgrades.size()];
+            newSave.potatoCount = save.potatoCount;
+            if (newSave.potatoCount == null) {
+                newSave.potatoCount = BigInteger.valueOf(0);
+            }
             int i = 0;
             for (AbstractUpgrade upgrade : allUpgrades) {
                 boolean exist = false;
