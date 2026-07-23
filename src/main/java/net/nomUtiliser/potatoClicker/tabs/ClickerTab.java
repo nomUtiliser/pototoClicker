@@ -80,9 +80,10 @@ public class ClickerTab extends BaseVTab<VBox> {
     }
     @Override
     protected void setPanel() {
+        // create hashmap to stock scheduler
         schedulersMap = new HashMap<>();
+        //create upgradesContainer
         upgradesContainer = new VBox(10);
-
         // Set container size to ensure adequate height
         upgradesContainer.setPrefHeight(1000);
         upgradesContainer.setPrefWidth(200);
@@ -117,6 +118,7 @@ public class ClickerTab extends BaseVTab<VBox> {
             potatoImg = new ImageView();
             PtfLogger.error("Failed to load potato");
         }
+        // create moneyPanel to display you money
         moneyPanel = new Label();
         moneyPanel.setMaxSize(100, 60);
         moneyPanel.setPrefSize(100, 30);
@@ -126,18 +128,21 @@ public class ClickerTab extends BaseVTab<VBox> {
 
         // Create HBox to put ScrollPane on the right side with proper stretching
         pototoImgPane = new Pane();
+        pototoImgPane.getChildren().add(potatoImg);
+        //create mainContainer to put 3 part
         HBox mainContainer = new HBox();
         mainContainer.setMinHeight(400);
-        pototoImgPane.getChildren().add(potatoImg);
         mainContainer.getChildren().addAll(pototoImgPane, moneyPanel, scrollPane);
         mainContainer.setSpacing(10);
         mainContainer.getStyleClass().add("main-container");
         mainContainer.setMaxSize(700, Double.MAX_VALUE);
+        // config HBox
         HBox.setHgrow(scrollPane, Priority.ALWAYS);
         HBox.setHgrow(potatoImg, Priority.NEVER);
         HBox.setHgrow(moneyPanel, Priority.NEVER);
-
+        // add everything to the VBOx
         vContent.getChildren().addAll(pototoPerSec, mainContainer);
+        //display animation and add money when clicked
         potatoImg.setOnMouseClicked(e -> {
             moneyManager.addMoney(BigInteger.valueOf(1));
             moneyManager.potatoClicked(pototoImgPane, e.getX(), e.getY());
