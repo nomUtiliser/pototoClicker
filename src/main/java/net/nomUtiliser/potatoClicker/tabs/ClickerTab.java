@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class ClickerTab extends BaseVTab<VBox> {
+    // link utility func
     private final UpgradeManager upgradeManager;
     private final MoneyManager moneyManager;
     private final SaveHandler SaveHandler;
@@ -32,8 +33,20 @@ public class ClickerTab extends BaseVTab<VBox> {
         SaveHandler = new SaveHandler(this);
         upgradeManager.addUpgrades();
     }
+    // right part
+    private Pane pototoImgPane;
+    private ImageView potatoImg;
+    //left part
+    private ScrollPane scrollPane;
+    private VBox upgradesContainer;
+    //center part
+    private Label pototoPerSec;
+    private Label moneyPanel;
+    //money INt...
     private Map<AbstractUpgrade, Label> costLabels;
-
+    private Map<String, ScheduledExecutorService> schedulersMap;
+    private BigInteger pototoPerSecInt;
+    // get for other java class
     public Map<AbstractUpgrade, Label> getCostLabels() {
         if (costLabels == null) {
             costLabels = new HashMap<>();
@@ -43,33 +56,25 @@ public class ClickerTab extends BaseVTab<VBox> {
     public Map<String, ScheduledExecutorService> getSchedulersMap() {
         return schedulersMap;
     }
-
     public Label getPototoPerSec() {
         return pototoPerSec;
     }
     public VBox getUpgradesContainer() {
         return upgradesContainer;
     }
-    private Pane pototoImgPane;
-    private ImageView potatoImg;
-    private ScrollPane scrollPane;
-    private VBox upgradesContainer;
-    private Label pototoPerSec;
-    private Map<String, ScheduledExecutorService> schedulersMap;
-    private BigInteger pototoPerSecInt;
     public BigInteger getPototoPerSecInt() {
         return pototoPerSecInt;
     }
     public void setPototoPerSecInt(BigInteger value) {
         this.pototoPerSecInt = value;
     }
+    // instantiate
     @Override
     protected void instantiate() {
         PANEL = new VBox();
         PANEL.getStyleClass().add("pototoClicker");
     }
 
-    private Label moneyPanel;
     public void setMoneyPanelPototo(String text) {
         moneyPanel.setText(text);
     }
@@ -82,10 +87,12 @@ public class ClickerTab extends BaseVTab<VBox> {
         upgradesContainer.setPrefHeight(1000);
         upgradesContainer.setPrefWidth(200);
         upgradesContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        // create potato per sec display label
         pototoPerSec = new Label("O Potatoes/s");
         pototoPerSec.setPrefSize(300, 20);
         pototoPerSec.setMaxSize(300, 20);
         pototoPerSec.setMinSize(300,20);
+        // create scroll pane
         scrollPane = new ScrollPane(upgradesContainer);
         scrollPane.setFitToWidth(true);
         scrollPane.setContent(upgradesContainer);
@@ -93,11 +100,11 @@ public class ClickerTab extends BaseVTab<VBox> {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-padding: 5;");
         scrollPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        
+
         // Make the scroll pane take up all available space in the HBox
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
         VBox.setVgrow(upgradesContainer, Priority.ALWAYS);
-        
+
         // Load potato image from resources
         try {
             Image potatoImage = new Image("textures/pototo.png");
@@ -116,7 +123,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         moneyPanel.getStyleClass().add("moneyPanel");
         if (CounterHandler.getSave()== null) return;
         moneyPanel.setText(Functions.formatMessage("$$1 potatoes", CounterHandler.getSave().potatoCount));
-        
+
         // Create HBox to put ScrollPane on the right side with proper stretching
         pototoImgPane = new Pane();
         HBox mainContainer = new HBox();
@@ -129,7 +136,7 @@ public class ClickerTab extends BaseVTab<VBox> {
         HBox.setHgrow(scrollPane, Priority.ALWAYS);
         HBox.setHgrow(potatoImg, Priority.NEVER);
         HBox.setHgrow(moneyPanel, Priority.NEVER);
-        
+
         vContent.getChildren().addAll(pototoPerSec, mainContainer);
         potatoImg.setOnMouseClicked(e -> {
             moneyManager.addMoney(BigInteger.valueOf(1));
